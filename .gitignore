@@ -27,4 +27,4 @@ opentelemetry_log_exporter-*.tar
 
 # intellij stuff
 .idea/
-pears.iml
+*.iml
