@@ -1,4 +1,4 @@
-defmodule OpentelemetryLogExporter.MixProject do
+defmodule OpenTelemetryLogExporter.MixProject do
   use Mix.Project
 
   def project do

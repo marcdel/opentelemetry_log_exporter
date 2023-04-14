@@ -1,7 +1,5 @@
-defmodule OpentelemetryLogExporter do
-  @moduledoc """
-  Documentation for `OpentelemetryLogExporter`.
-  """
+defmodule OpenTelemetryLogExporter do
+  @behaviour :otel_exporter
 
   @doc """
   Hello world.

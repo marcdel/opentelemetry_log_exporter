@@ -1,4 +1,4 @@
-# OpentelemetryLogExporter
+# OpenTelemetryLogExporter
 
 Sometimes you just wanna look at your spans 🤷🏻‍♂️
 

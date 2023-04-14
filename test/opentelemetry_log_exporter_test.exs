@@ -1,4 +1,4 @@
-defmodule OpentelemetryLogExporterTest do
+defmodule OpenTelemetryLogExporterTest do
   use ExUnit.Case
   doctest OpentelemetryLogExporter
 
