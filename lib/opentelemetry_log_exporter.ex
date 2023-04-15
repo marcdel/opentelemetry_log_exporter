@@ -1,6 +1,6 @@
 defmodule OpenTelemetryLogExporter do
   @moduledoc """
-  Implements the (:otel_exporter)[https://github.com/open-telemetry/opentelemetry-erlang/blob/3bf392bf4efbbc93fcbf780fc13ee884475b2e20/apps/opentelemetry/src/otel_exporter.erl#L18] behavior
+  Implements the [:otel_exporter](https://github.com/open-telemetry/opentelemetry-erlang/blob/3bf392bf4efbbc93fcbf780fc13ee884475b2e20/apps/opentelemetry/src/otel_exporter.erl#L18) behavior
   """
   require Logger
 
