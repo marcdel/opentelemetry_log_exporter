@@ -19,14 +19,23 @@ defmodule OpenTelemetryLogExporter do
     :ok
   end
 
-  def log_span(span_record) do
+  defp log_span(span_record) do
+    span_record
+    |> generate_message()
+    |> Logger.info()
+  end
+
+  def generate_message(span_record) do
     span = Span.new(span_record)
     attr_string = attr_csv(span.attributes)
 
-    Logger.info("[span] #{span.duration_ms}ms \"#{span.name}\" #{attr_string}")
+    "[span] #{span.duration_ms}ms \"#{span.name}\" #{attr_string}"
   end
 
   defp attr_csv(attr_map) do
-    Enum.map_join(attr_map, ", ", fn {k, v} -> "#{k}: #{inspect(v)}" end)
+    Enum.map_join(attr_map, " ", fn {k, v} -> "#{k}=#{attribute_value(v)}" end)
   end
+
+  defp attribute_value(value) when is_binary(value), do: value
+  defp attribute_value(value), do: inspect(value)
 end

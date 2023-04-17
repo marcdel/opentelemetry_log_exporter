@@ -1,5 +1,11 @@
+defmodule OpenTelemetryLogExporter.Event do
+  defstruct [:type, :timestamp, attributes: %{}]
+end
+
 defmodule OpenTelemetryLogExporter.Span do
-  defstruct [:name, :start_time, :end_time, :duration_ms, :attributes]
+  alias OpenTelemetryLogExporter.Event
+
+  defstruct [:name, :start_time, :end_time, :duration_ms, :status, attributes: %{}, events: []]
 
   def new(otel_span) do
     {
@@ -12,10 +18,10 @@ defmodule OpenTelemetryLogExporter.Span do
       _kind,
       start_time,
       end_time,
-      {:attributes, _, :infinity, _, attrs},
-      _events,
+      attributes,
+      events,
       _links,
-      _status,
+      status,
       _trace_flags,
       _is_recording,
       _instrumentation_scope
@@ -26,11 +32,33 @@ defmodule OpenTelemetryLogExporter.Span do
       start_time: start_time,
       end_time: end_time,
       duration_ms: duration(start_time, end_time),
-      attributes: attrs
+      attributes: attributes(attributes),
+      events: events(events),
+      status: status(status)
     }
   end
 
-  defp duration(start_time, end_time, unit \\ :millisecond) do
+  defp duration(start_time, end_time, unit \\ :millisecond)
+
+  defp duration(start_time, end_time, unit)
+       when is_integer(start_time) and is_integer(end_time) do
     System.convert_time_unit(end_time - start_time, :native, unit)
   end
+
+  defp duration(_, _, _), do: nil
+
+  defp events({:events, _, _, _, _, events}), do: Enum.map(events, &event/1)
+  defp events(_), do: []
+
+  defp event({:event, timestamp, type, attributes}) do
+    %Event{type: type, timestamp: timestamp, attributes: attributes(attributes)}
+  end
+
+  defp attributes({:attributes, _, _, _, attrs}), do: attrs
+  defp attributes(_), do: %{}
+
+  defp status({:status, :ok, _}), do: :ok
+  defp status({:status, :error, _}), do: :error
+  defp status({:status, :unset, _}), do: :unset
+  defp status(_), do: :unset
 end
