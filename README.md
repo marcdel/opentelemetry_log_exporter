@@ -18,7 +18,7 @@ The package can be installed by adding `opentelemetry_log_exporter` to your list
 ```elixir
 def deps do
   [
-    {:opentelemetry_log_exporter, "~> 0.1.0"}
+    {:opentelemetry_log_exporter, "~> 0.2.0"}
   ]
 end
 ```
