@@ -6,9 +6,9 @@ Inspired by ~~shamelessly stolen from~~ [otel_exporter_stdout](https://github.co
 
 Example output:
 ```shell
-[info] [span] 5ms "/teams/log_in" net.peer.port: 51497, net.sock.peer.addr: "127.0.0.1", net.transport: :"IP.TCP", http.method: "GET", http.status_code: 200, http.flavor: :"1.1", http.scheme: "http", http.target: "/teams/log_in", http.route: "/teams/log_in", http.client_ip: "127.0.0.1", net.host.name: "localhost", net.host.port: 4000, net.sock.host.addr: "127.0.0.1", phoenix.plug: Phoenix.LiveView.Plug, phoenix.action: :new
-[info] [span] 1ms "PearsWeb.TeamLoginLive.mount" name: "nil"
-[info] [span] 0ms "pears.repo.query" source: nil, db.statement: "CREATE TABLE IF NOT EXISTS \"schema_migrations\" (\"version\" bigint, \"inserted_at\" timestamp(0), PRIMARY KEY (\"version\"))", db.type: :sql, db.instance: "pears_dev", db.url: "ecto://localhost", total_time_microseconds: 669, decode_time_microseconds: 1, idle_time_microseconds: 674906, query_time_microseconds: 293, queue_time_microseconds: 374
+[info] [span] 22ms "/teams/log_in" http.client_ip=127.0.0.1 http.flavor=:"1.1" http.method=GET http.scheme=http http.target=/teams/log_in net.host.name=localhost net.host.port=4000 net.peer.port=56526 net.sock.host.addr=127.0.0.1 net.sock.peer.addr=127.0.0.1 net.transport=:"IP.TCP" http.status_code=200 http.route=/teams/log_in phoenix.action=:new phoenix.plug=Phoenix.LiveView.Plug
+[info] [span] 0ms "PearsWeb.TeamLoginLive.mount" name=nil
+[info] [span] 0ms "pears.repo.query" source=nil db.instance=pears_dev db.statement=CREATE TABLE IF NOT EXISTS "schema_migrations" ("version" bigint, "inserted_at" timestamp(0), PRIMARY KEY ("version")) db.type=:sql db.url=ecto://localhost total_time_microseconds=597 decode_time_microseconds=1 idle_time_microseconds=997829 query_time_microseconds=201 queue_time_microseconds=394
 ```
 
 ## Installation
