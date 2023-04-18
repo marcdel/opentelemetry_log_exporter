@@ -23,3 +23,17 @@ def deps do
 end
 ```
 
+and as a trace exporter in `config/dev.exs`.
+
+```elixir
+config :opentelemetry, traces_exporter: {Elixir.OpenTelemetryLogExporter, []}
+```
+
+You will need to change the scheduled delay in `config/test.exs` because by default the test process will exit before the spans are exported.
+
+```elixir
+config :opentelemetry,
+  processors: [
+    {:otel_batch_processor, %{scheduled_delay_ms: 1, exporter: {Elixir.OpenTelemetryLogExporter, []}}}
+  ]
+```
