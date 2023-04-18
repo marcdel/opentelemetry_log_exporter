@@ -16,19 +16,19 @@ defmodule OpenTelemetryLogExporter do
     spans_table_id
     |> :ets.tab2list()
     |> Enum.reverse()
+    |> Enum.map(&Span.new/1)
     |> Enum.each(&log_span/1)
 
     :ok
   end
 
-  defp log_span(span_record) do
-    span_record
+  defp log_span(span) do
+    span
     |> generate_message()
     |> Logger.info()
   end
 
-  def generate_message(span_record) do
-    span = Span.new(span_record)
+  def generate_message(span) do
     attr_string = attr_csv(span.attributes)
 
     id = truncate_id(span.span_id)

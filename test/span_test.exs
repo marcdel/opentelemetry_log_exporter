@@ -37,6 +37,21 @@ defmodule OpenTelemetryLogExporter.SpanTest do
     assert span.parent_span_id == 13_574_622_720_317_236_748
   end
 
+  test "undefined ids are set to nil" do
+    otel_span =
+      span(
+        trace_id: :undefined,
+        span_id: :undefined,
+        parent_span_id: :undefined
+      )
+
+    span = Span.new(otel_span)
+
+    assert span.trace_id == nil
+    assert span.span_id == nil
+    assert span.parent_span_id == nil
+  end
+
   test "calculates duration in milliseconds" do
     otel_span = span(start_time: -576_460_751_228_864_375, end_time: -576_460_751_126_766_291)
 

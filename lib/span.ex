@@ -39,9 +39,9 @@ defmodule OpenTelemetryLogExporter.Span do
     } = otel_span
 
     %__MODULE__{
-      trace_id: trace_id,
-      span_id: span_id,
-      parent_span_id: parent_span_id,
+      trace_id: undefined_to_nil(trace_id),
+      span_id: undefined_to_nil(span_id),
+      parent_span_id: undefined_to_nil(parent_span_id),
       name: span_name,
       start_time: start_time,
       end_time: end_time,
@@ -51,6 +51,9 @@ defmodule OpenTelemetryLogExporter.Span do
       status: status(status)
     }
   end
+
+  defp undefined_to_nil(:undefined), do: nil
+  defp undefined_to_nil(value), do: value
 
   defp duration(start_time, end_time, unit \\ :millisecond)
 

@@ -71,6 +71,7 @@ defmodule OpenTelemetryLogExporterTest do
           end_time: -576_460_751_126_766_291,
           attributes: attributes
         )
+        |> OpenTelemetryLogExporter.Span.new()
 
       message = OpenTelemetryLogExporter.generate_message(otel_span)
 
