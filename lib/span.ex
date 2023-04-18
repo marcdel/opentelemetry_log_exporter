@@ -5,15 +5,26 @@ end
 defmodule OpenTelemetryLogExporter.Span do
   alias OpenTelemetryLogExporter.Event
 
-  defstruct [:name, :start_time, :end_time, :duration_ms, :status, attributes: %{}, events: []]
+  defstruct [
+    :trace_id,
+    :span_id,
+    :parent_span_id,
+    :name,
+    :start_time,
+    :end_time,
+    :duration_ms,
+    :status,
+    attributes: %{},
+    events: []
+  ]
 
   def new(otel_span) do
     {
       :span,
-      _trace_id,
-      _span_id,
+      trace_id,
+      span_id,
       _trace_state,
-      _parent_span_id,
+      parent_span_id,
       span_name,
       _kind,
       start_time,
@@ -28,6 +39,9 @@ defmodule OpenTelemetryLogExporter.Span do
     } = otel_span
 
     %__MODULE__{
+      trace_id: trace_id,
+      span_id: span_id,
+      parent_span_id: parent_span_id,
       name: span_name,
       start_time: start_time,
       end_time: end_time,

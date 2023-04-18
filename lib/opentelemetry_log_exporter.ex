@@ -13,8 +13,10 @@ defmodule OpenTelemetryLogExporter do
   def shutdown(_), do: :ok
 
   def export(_traces, spans_table_id, _resource, _config) do
-    spans_list = :ets.tab2list(spans_table_id)
-    Enum.each(spans_list, &log_span/1)
+    spans_table_id
+    |> :ets.tab2list()
+    |> Enum.reverse()
+    |> Enum.each(&log_span/1)
 
     :ok
   end
@@ -29,7 +31,22 @@ defmodule OpenTelemetryLogExporter do
     span = Span.new(span_record)
     attr_string = attr_csv(span.attributes)
 
-    "[span] #{span.duration_ms}ms \"#{span.name}\" #{attr_string}"
+    id = truncate_id(span.span_id)
+    parent_id = truncate_id(span.parent_span_id)
+
+    "[span] #{parent_id} |> #{id} #{span.duration_ms}ms \"#{span.name}\" #{attr_string}"
+  end
+
+  defp truncate_id(nil), do: String.pad_leading("", 4, " ")
+  defp truncate_id(:undefined), do: String.pad_leading("", 4, " ")
+
+  defp truncate_id(id) do
+    id
+    |> Integer.digits()
+    |> Enum.take(-4)
+    |> Integer.undigits()
+    |> Integer.to_string()
+    |> String.pad_leading(4, " ")
   end
 
   defp attr_csv(attr_map) do

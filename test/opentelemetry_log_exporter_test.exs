@@ -32,16 +32,27 @@ defmodule OpenTelemetryLogExporterTest do
     log =
       capture_log(fn ->
         Tracer.with_span "span-1" do
-          Tracer.set_attribute("attr1", "value1")
-          Tracer.set_attributes([{"attr2", 37}])
-          Span.record_exception(Tracer.current_span_ctx(), %RuntimeError{message: "farts"})
-          Span.set_status(Tracer.current_span_ctx(), OpenTelemetry.status(:error))
+          Tracer.with_span "span-2" do
+            Tracer.set_attribute("attr1", "value1")
+            Tracer.set_attributes([{"attr2", 37}])
+            Span.record_exception(Tracer.current_span_ctx(), %RuntimeError{message: "farts"})
+            Span.set_status(Tracer.current_span_ctx(), OpenTelemetry.status(:error))
+
+            Tracer.with_span "span-3" do
+            end
+
+            Tracer.with_span "span-4" do
+              Tracer.with_span "span-5" do
+              end
+            end
+          end
         end
 
         # Seems like this might be flaky 😞
         Process.sleep(100)
       end)
-      |> IO.inspect()
+
+    IO.puts(log)
 
     assert log =~ "[span]"
     assert log =~ "span-1"
@@ -54,6 +65,8 @@ defmodule OpenTelemetryLogExporterTest do
       otel_span =
         span(
           name: "grilled_spam",
+          span_id: 321,
+          parent_span_id: 1234,
           start_time: -576_460_751_228_864_375,
           end_time: -576_460_751_126_766_291,
           attributes: attributes
@@ -61,7 +74,7 @@ defmodule OpenTelemetryLogExporterTest do
 
       message = OpenTelemetryLogExporter.generate_message(otel_span)
 
-      assert message =~ "[span] 102ms \"grilled_spam\" attr1=value1 attr2=37"
+      assert message =~ "[span] 1234 |>  321 102ms \"grilled_spam\" attr1=value1 attr2=37"
     end
   end
 end

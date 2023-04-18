@@ -22,6 +22,21 @@ defmodule OpenTelemetryLogExporter.SpanTest do
     assert span.attributes == %{"attr-1" => "value-1", "attr-2" => "value-2"}
   end
 
+  test "extracts trace, span, and parent ids" do
+    otel_span =
+      span(
+        trace_id: 141_947_240_853_973_535_602_059_278_503_659_962_369,
+        span_id: 9_787_989_678_256_304_207,
+        parent_span_id: 13_574_622_720_317_236_748
+      )
+
+    span = Span.new(otel_span)
+
+    assert span.trace_id == 141_947_240_853_973_535_602_059_278_503_659_962_369
+    assert span.span_id == 9_787_989_678_256_304_207
+    assert span.parent_span_id == 13_574_622_720_317_236_748
+  end
+
   test "calculates duration in milliseconds" do
     otel_span = span(start_time: -576_460_751_228_864_375, end_time: -576_460_751_126_766_291)
 
