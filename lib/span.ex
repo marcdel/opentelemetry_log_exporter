@@ -14,7 +14,7 @@ defmodule OpenTelemetryLogExporter.Span do
     :end_time,
     :duration_ms,
     :status,
-    :indent_level,
+    indent_level: 0,
     attributes: %{},
     children: [],
     events: []

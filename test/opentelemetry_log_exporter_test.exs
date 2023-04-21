@@ -31,18 +31,25 @@ defmodule OpenTelemetryLogExporterTest do
   test "logs emitted spans" do
     log =
       capture_log(fn ->
-        Tracer.with_span "span-1" do
-          Tracer.with_span "span-2" do
+        Tracer.with_span "PearsWeb.TeamLoginLive.mount" do
+          Tracer.set_attribute("beep", "boop")
+
+          Tracer.with_span "pears.repo.query" do
             Tracer.set_attribute("attr1", "value1")
             Tracer.set_attributes([{"attr2", 37}])
             Span.record_exception(Tracer.current_span_ctx(), %RuntimeError{message: "farts"})
             Span.set_status(Tracer.current_span_ctx(), OpenTelemetry.status(:error))
 
-            Tracer.with_span "span-3" do
+            Tracer.with_span "pears.repo.query:schema_migrations" do
+              Tracer.set_attribute("attr3", "value3")
             end
 
-            Tracer.with_span "span-4" do
-              Tracer.with_span "span-5" do
+            Tracer.with_span "/teams/log_in" do
+              Tracer.set_attribute("beep", "boop")
+              Tracer.set_attribute("foo", "bar")
+
+              Tracer.with_span "PearsWeb.TeamLoginLive.mount" do
+                Tracer.set_attribute("some_map", inspect(%{x: 12}))
               end
             end
           end
@@ -55,14 +62,14 @@ defmodule OpenTelemetryLogExporterTest do
     IO.puts(log)
 
     assert log =~ "[span]"
-    assert log =~ "span-1"
+    assert log =~ "PearsWeb.TeamLoginLive.mount"
   end
 
-  describe "log_span/1" do
+  describe "generate_trace_messages/1" do
     test "logs name and attributes" do
       attributes = :otel_attributes.new([{"attr1", "value1"}, {"attr2", "37"}], 128, :infinity)
 
-      otel_span =
+      root_span =
         span(
           name: "grilled_spam",
           span_id: 321,
@@ -73,9 +80,9 @@ defmodule OpenTelemetryLogExporterTest do
         )
         |> OpenTelemetryLogExporter.Span.new()
 
-      message = OpenTelemetryLogExporter.generate_message(otel_span)
+      message = OpenTelemetryLogExporter.generate_trace_messages(root_span)
 
-      assert message =~ "[span] 1234 |>  321 102ms \"grilled_spam\" attr1=value1 attr2=37"
+      assert ["[span] 102ms  ├─  321  \"grilled_spam\" attr1=value1 attr2=37"] = message
     end
   end
 end

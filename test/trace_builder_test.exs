@@ -31,6 +31,21 @@ defmodule OpenTelemetryLogExporter.TraceBuilderTest do
       assert [%{span_id: 1, children: [%{span_id: 2}, %{span_id: 3}]}] = trace
     end
 
+    test "handles an empty list" do
+      assert [] == TraceBuilder.build([])
+    end
+
+    test "handles spans with no root" do
+      spans = [
+        Span.new(span(name: "span2", span_id: 2, parent_span_id: 1)),
+        Span.new(span(name: "span3", span_id: 3, parent_span_id: 1))
+      ]
+
+      trace = TraceBuilder.build(spans)
+
+      assert [%{span_id: 2, children: []}, %{span_id: 3, children: []}] = trace
+    end
+
     test "handles spans at multiple levels" do
       spans = [
         Span.new(span(name: "span1", span_id: 1, parent_span_id: :undefined)),
@@ -44,19 +59,19 @@ defmodule OpenTelemetryLogExporter.TraceBuilderTest do
       assert [
                %{
                  span_id: 1,
-                 indent_level: 1,
+                 indent_level: 0,
                  children: [
                    %{
                      span_id: 2,
-                     indent_level: 2,
+                     indent_level: 1,
                      children: [
                        %{
                          span_id: 3,
-                         indent_level: 3,
+                         indent_level: 2,
                          children: [
                            %{
                              span_id: 4,
-                             indent_level: 4
+                             indent_level: 3
                            }
                          ]
                        }

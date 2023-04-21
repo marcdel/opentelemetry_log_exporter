@@ -28,51 +28,32 @@ defmodule OpenTelemetryLogExporter do
     |> :ets.tab2list()
     |> Enum.reverse()
     |> Enum.map(&Span.new/1)
-    |> tap(fn spans ->
-      spans
-      |> TraceBuilder.build()
-      |> Enum.map(&generate_message_2/1)
-    end)
-    # |> Enum.each(&log_span/1)
+    |> TraceBuilder.build()
+    |> Enum.map(&generate_trace_messages/1)
+    |> List.flatten()
+    |> Enum.each(&Logger.info/1)
   end
 
-  defp generate_message_2(span) do
+  def generate_trace_messages(span) do
     attr_string = attr_csv(span.attributes)
-    id = truncate_id(span.span_id)
-    parent_id = truncate_id(span.parent_span_id)
-    indentation = String.duplicate(" ", span.indent_level*8)
+    id = truncate_and_pad_id(span.span_id)
+    indentation = String.duplicate(" ", span.indent_level * 4)
+    duration = String.pad_leading("#{span.duration_ms}", 3, " ")
 
-    "[span] #{indentation} #{parent_id} |> #{id} #{span.duration_ms}ms \"#{span.name}\" #{attr_string}"
-    |> IO.inspect()
-
-    Enum.map(span.children, &generate_message_2/1)
+    ["[span] #{duration}ms #{indentation} ├─ #{id} \"#{span.name}\" #{attr_string}"] ++
+      Enum.map(span.children, &generate_trace_messages/1)
   end
 
-  defp log_span(span) do
-    span
-    |> generate_message()
-    # |> Logger.info()
-  end
+  defp truncate_and_pad_id(nil), do: ""
+  defp truncate_and_pad_id(:undefined), do: ""
 
-  def generate_message(span) do
-    attr_string = attr_csv(span.attributes)
-
-    id = truncate_id(span.span_id)
-    parent_id = truncate_id(span.parent_span_id)
-
-    "[span] #{parent_id} |> #{id} #{span.duration_ms}ms \"#{span.name}\" #{attr_string}"
-  end
-
-  defp truncate_id(nil), do: String.pad_leading("", 4, " ")
-  defp truncate_id(:undefined), do: String.pad_leading("", 4, " ")
-
-  defp truncate_id(id) do
+  defp truncate_and_pad_id(id) do
     id
     |> Integer.digits()
     |> Enum.take(-4)
     |> Integer.undigits()
     |> Integer.to_string()
-    |> String.pad_leading(4, " ")
+    |> then(fn str -> " #{str} " end)
   end
 
   defp attr_csv(attr_map) do
