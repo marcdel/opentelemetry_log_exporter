@@ -1,7 +1,7 @@
 defmodule OpenTelemetryLogExporter.MixProject do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.0"
   @github_page "https://github.com/marcdel/opentelemetry_log_exporter"
 
   def project do

@@ -13,9 +13,11 @@ defmodule OpenTelemetryLogExporter do
 
   def shutdown(_), do: :ok
 
-  def export(_traces, span_table_id, _resource, _config) do
+  def export(_traces, span_table_id, _resource, config) do
     try do
-      do_export(span_table_id)
+      span_table_id
+      |> get_messages_to_be_logged()
+      |> log_messages(config)
     rescue
       e -> Logger.error(Exception.format(:error, e, __STACKTRACE__))
     end
@@ -23,7 +25,7 @@ defmodule OpenTelemetryLogExporter do
     :ok
   end
 
-  defp do_export(span_table_id) do
+  defp get_messages_to_be_logged(span_table_id) do
     span_table_id
     |> :ets.tab2list()
     |> Enum.reverse()
@@ -31,7 +33,11 @@ defmodule OpenTelemetryLogExporter do
     |> TraceBuilder.build()
     |> Enum.map(&generate_trace_messages/1)
     |> List.flatten()
-    |> Enum.each(&Logger.info/1)
+  end
+
+  defp log_messages(messages, config) do
+    level = Keyword.get(config, :level, :info)
+    Enum.each(messages, fn message -> Logger.log(level, message) end)
   end
 
   def generate_trace_messages(span) do

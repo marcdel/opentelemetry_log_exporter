@@ -18,7 +18,7 @@ The package can be installed by adding `opentelemetry_log_exporter` to your list
 ```elixir
 def deps do
   [
-    {:opentelemetry_log_exporter, "~> 0.4.0"}
+    {:opentelemetry_log_exporter, "~> 0.5.0"}
   ]
 end
 ```
@@ -26,7 +26,7 @@ end
 and as a trace exporter in `config/dev.exs`.
 
 ```elixir
-config :opentelemetry, traces_exporter: {Elixir.OpenTelemetryLogExporter, []}
+config :opentelemetry, traces_exporter: {Elixir.OpenTelemetryLogExporter, [level: :info]}
 ```
 
 You will need to change the scheduled delay in `config/test.exs` because by default the test process will exit before the spans are exported.
@@ -34,6 +34,8 @@ You will need to change the scheduled delay in `config/test.exs` because by defa
 ```elixir
 config :opentelemetry,
   processors: [
-    {:otel_batch_processor, %{scheduled_delay_ms: 1, exporter: {Elixir.OpenTelemetryLogExporter, []}}}
+    {:otel_batch_processor, %{scheduled_delay_ms: 1, exporter: {Elixir.OpenTelemetryLogExporter, [level: :warning]}}}
   ]
 ```
+
+You can change the level at which spans are logged by passing the `:level` keyword

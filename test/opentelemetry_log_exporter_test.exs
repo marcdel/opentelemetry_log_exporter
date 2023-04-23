@@ -22,7 +22,7 @@ defmodule OpenTelemetryLogExporterTest do
 
     :application.start(:opentelemetry)
 
-    :otel_batch_processor.set_exporter(Elixir.OpenTelemetryLogExporter, [])
+    :otel_batch_processor.set_exporter(Elixir.OpenTelemetryLogExporter, level: :warning)
 
     on_exit(fn ->
       :application.stop(:opentelemetry)
