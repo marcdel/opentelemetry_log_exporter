@@ -5,6 +5,8 @@ defmodule OpenTelemetryLogExporterTest do
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.Span, as: Span
 
+  alias OpenTelemetryLogExporter.Event
+
   require Record
   @fields Record.extract(:span, from_lib: "opentelemetry/include/otel_span.hrl")
   Record.defrecordp(:span, @fields)
@@ -42,6 +44,7 @@ defmodule OpenTelemetryLogExporterTest do
 
             Tracer.with_span "pears.repo.query:schema_migrations" do
               Tracer.set_attribute("attr3", "value3")
+              Tracer.add_event("SOMETHING HAPPENED", blah: "ugh")
             end
 
             Tracer.with_span "/teams/log_in" do
@@ -80,9 +83,27 @@ defmodule OpenTelemetryLogExporterTest do
         )
         |> OpenTelemetryLogExporter.Span.new()
 
-      message = OpenTelemetryLogExporter.generate_trace_messages(root_span)
+      messages = OpenTelemetryLogExporter.generate_trace_messages(root_span)
 
-      assert ["[span] 102ms  ├─  321  \"grilled_spam\" attr1=value1 attr2=37"] = message
+      assert ["[span] 102ms  ├─  321  \"grilled_spam\" attr1=value1 attr2=37"] = messages
+    end
+  end
+
+  describe "generate_event_messages/1" do
+    test "reverses the order the events since they seem to come in backwards" do
+      span = %OpenTelemetryLogExporter.Span{
+        events: [
+          %Event{type: "event2", attributes: %{attr2: "boop"}},
+          %Event{type: "event1", attributes: %{attr1: "beep"}}
+        ]
+      }
+
+      messages = OpenTelemetryLogExporter.generate_event_messages(span)
+
+      assert [
+               "[event]           ├─ \"event1\" attr1=beep",
+               "[event]           ├─ \"event2\" attr2=boop"
+             ] = messages
     end
   end
 end

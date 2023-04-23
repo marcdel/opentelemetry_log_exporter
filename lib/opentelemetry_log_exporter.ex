@@ -35,13 +35,26 @@ defmodule OpenTelemetryLogExporter do
   end
 
   def generate_trace_messages(span) do
-    attr_string = attr_csv(span.attributes)
     id = truncate_and_pad_id(span.span_id)
-    indentation = String.duplicate(" ", span.indent_level * 4)
     duration = String.pad_leading("#{span.duration_ms}", 3, " ")
+    indentation = String.duplicate(" ", span.indent_level * 4)
+    attr_string = attr_csv(span.attributes)
 
     ["[span] #{duration}ms #{indentation} ├─ #{id} \"#{span.name}\" #{attr_string}"] ++
+      generate_event_messages(span) ++
       Enum.map(span.children, &generate_trace_messages/1)
+  end
+
+  def generate_event_messages(span) do
+    span.events
+    |> Enum.reverse()
+    |> Enum.map(fn event ->
+      duration = String.duplicate(" ", 3 + 2)
+      indentation = String.duplicate(" ", (span.indent_level + 1) * 4)
+      attr_string = attr_csv(event.attributes)
+
+      "[event] #{duration} #{indentation}├─ \"#{event.type}\" #{attr_string}"
+    end)
   end
 
   defp truncate_and_pad_id(nil), do: ""
